@@ -21,8 +21,15 @@
     "postpackage": "electron-packager ./ --out=./release-builds"
   },
   "dependencies": {
+    "bootstrap": "^4.5.0",
+    "googleapis": "^52.1.0",
+    "moment": "^2.27.0",
+    "puppeteer-core": "^3.3.0",
+    "puppeteer-in-electron": "^3.0.2",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "react-router-dom": "^5.2.0",
+    "reactstrap": "^8.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
