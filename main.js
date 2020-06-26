@@ -103,10 +103,18 @@ const createMainWindow = () => {
         });
       });
       const arr = resultOdds[0].filter(String);
-
+      let sheetArray = [];
       let newArray = [];
       arr.map((ar) => {
         let [match, one, X, two, Bs] = ar;
+        sheetArray.push([
+          match,
+          Bs,
+          one,
+          X,
+          two,
+          moment().format("dddd:HH:mm"),
+        ]);
         ar = {
           match: match,
           bs: Bs,
@@ -115,6 +123,7 @@ const createMainWindow = () => {
           two: two,
           scrapingDate: moment().format("dddd:HH:mm"),
         };
+
         newArray.push(ar);
       });
       //win.hide();
@@ -150,7 +159,7 @@ const createMainWindow = () => {
           spreadsheetId: "1O1kcu1G16R7WWa1sp0ouNwNuw8xfno2uII9Sj4L8MZc",
           range: "odds!A2:O",
           valueInputOption: "USER_ENTERED",
-          resource: { values: newArray },
+          resource: { values: sheetArray },
         };
         let result = await gsapi.spreadsheets.values.append(
           updateOpt,
@@ -201,7 +210,7 @@ const createMainWindow = () => {
 
         // });
         const pageH = await pie.getPage(horsesbrowser, window);
-        await pageH.waitFor(1000);
+        //await pageH.waitFor(1000);
         //await pageH.goto(URL, { waitUntil: "networkidle2" });
         // let btn = await pageH.$x('//*[@id="closeQubitModal"]');
         // await btn[0].click();

@@ -33,6 +33,7 @@ const Pup = () => {
           j: -1,
         })
       );
+      setLoading(false);
       setStop(false);
     } else {
       setStop(true);
@@ -94,17 +95,23 @@ const Pup = () => {
           </button>
         </div>
       </div>
+      <div className="row">
+        <div className="col-md-4 m-2">
+          <HoresTables
+            tableRightTop={tableRightTop}
+            loading={loading}
+            availablePays={availablePays}
+          />
+        </div>
 
-      <HoresTables
-        tableRightTop={tableRightTop}
-        loading={loading}
-        availablePays={availablePays}
-      />
-      <HoresTablesBottom
-        tableRightBottom={tableRightBottom}
-        loading={loading}
-        availablePays={availablePool}
-      />
+        <div className="col-md-8">
+          <HoresTablesBottom
+            tableRightBottom={tableRightBottom}
+            loading={loading}
+            availablePays={availablePool}
+          />
+        </div>
+      </div>
     </div>
   );
 };

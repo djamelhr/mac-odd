@@ -1,12 +1,16 @@
 import React from "react";
 
 const HoresTables = ({ tableRightBottom, loading, availablePool }) => {
+  console.log(tableRightBottom);
+
   if (loading) {
     return <h2>Loading...</h2>;
-  }
-  if (availablePool) {
+  } else if (availablePool) {
     return <h2>There are no will pays available.</h2>;
-  } else {
+  } else if (tableRightBottom.length == 0) {
+    return "";
+  }
+  {
     return (
       <div>
         <table className="table table-dark">
