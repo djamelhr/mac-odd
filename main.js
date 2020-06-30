@@ -198,6 +198,7 @@ const createMainWindow = () => {
       ++i;
 
       console.log(i);
+      mainWindow.webContents.send("index", i);
 
       try {
         let horsesbrowser = await pie.connect(app, puppeteer);
@@ -235,7 +236,7 @@ const createMainWindow = () => {
           resultHorses,
           resultH,
         });
-        mainWindow.webContents.send("horses", { resultH, resultHorses });
+        mainWindow.webContents.send("horses", {resultH, resultHorses });
 
         window.destroy();
       } catch (error) {

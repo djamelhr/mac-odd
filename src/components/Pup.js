@@ -1,19 +1,91 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useReducer } from "react";
 import { ipcRenderer } from "electron";
 import HoresTables from "./HoresTables";
 import HoresTablesBottom from "./HoresTablesBottom";
+
+const initalState = {
+  compte:0,
+  link :"",
+  loading :false ,
+  stoping :false ,
+  availablePays : false ,
+  availablePool :false,
+  tableRightTop :[],
+  tableRightBottom:[],
+  tableCenterBottom:[],
+  tableCenterTop:[],
+}
+function getHorses(state,action){
+   switch (action.type) {
+    case 'field':{
+      return{
+        ...state,
+        [action.field]: action.value
+  
+      }
+    }
+    case 'stopScraping':{
+      return{
+        ...state,
+       loading : false ,
+       stoping :false 
+      }
+    }
+    case 'startScraping':{
+      return{
+        ...state,
+       loading : true ,
+       stoping : true
+      }
+    }
+
+    case 'noPays_NoPool':{
+      return{
+        ...state,
+       loading : false ,
+       availablePays:true,
+       availablePool:true
+      }
+    }
+    case 'numberOfRepitition':{
+      return{
+        ...state,
+        compte:action.payload
+      }
+    }
+    case 'Pool_noPays':{
+      return{
+        ...state,
+       loading : false ,
+       availablePool:true,
+       tableRightBottom :action.payload
+      }
+    }
+    case 'Pool_Pays':{
+      console.log(action.payload);
+      
+      return{
+        ...state,
+       loading : false ,
+       tableRightBottom :action.payload.resultHorses[1],
+       tableRightTop : action.payload.resultHorses[0]
+
+      }
+    }
+   
+     default:
+       break;
+   }
+
+
+}
+
 const Pup = () => {
-  const [link, setLink] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [stop, setStop] = useState(false);
-  const [availablePays, setAvailablePays] = useState(false);
-  const [availablePool, setAvailablePool] = useState(false);
 
-  const [tableRightTop, setTableRightTop] = useState([]);
-  const [tableRightBottom, settabTeRightBottom] = useState([]);
-  const [tableCenterBottom, setTableCenterBottom] = useState([]);
-  const [tableCenterTop, setTableCenterTop] = useState([]);
-
+  const [state , dispatch]= useReducer(getHorses,initalState)
+  const {
+    compte, link, loading,stoping,availablePays,availablePool,tableRightTop,tableRightBottom,tableCenterBottom,tableCenterTop,} = state
+  
   const onSubmit = (e) => {
     e.preventDefault();
   };
@@ -24,8 +96,9 @@ const Pup = () => {
     };
     if (link === "") {
       alert("empty");
+      return;
     }
-    if (stop) {
+    if (stoping) {
       ipcRenderer.send(
         "horses",
         (datahorses = {
@@ -33,37 +106,42 @@ const Pup = () => {
           j: -1,
         })
       );
-      setLoading(false);
-      setStop(false);
+      dispatch( {type : "stopScraping"} )
     } else {
-      setStop(true);
-      // setTableRightTop([]);
-      // settabTeRightBottom([]);
-      // setTableCenterBottom([]);
-      // setTableCenterTop([]);
-      setLoading(true);
+      dispatch( {type : "startScraping"} )
+      
       ipcRenderer.send("horses", datahorses);
     }
   };
   useEffect(() => {
+    let isSubscribed = true;
+    ipcRenderer.on("index",(e,i)=>{
+      if(isSubscribed){
+        dispatch( {type : "numberOfRepitition",payload:i} )
+      }
+      
+    })
     ipcRenderer.on("horses", (e, data) => {
       console.log(data);
       console.log(data.resultHorses.length);
-      if (data.resultHorses.length == 0) {
-        setLoading(false);
-        setAvailablePays(true); //no one exist
-        setAvailablePool(true);
-      } else if (data.resultHorses.length == 1) {
-        setLoading(false);
-        setAvailablePool(true);
-        settabTeRightBottom(data.resultHorses[0]); //this case table bottom exist and top no
-      } else {
-        setLoading(false);
-        settabTeRightBottom(data.resultHorses[1]); // two tbale exist
-        setTableRightTop(data.resultHorses[0]);
-        // }
+      if(isSubscribed){
+        if (data.resultHorses.length == 0) {
+          dispatch( {type : "noPays_NoPool"} ) //no one exist
+          } else if (data.resultHorses.length == 1) {
+            
+    
+            dispatch( {type : "Pool_noPays",payload:data.resultHorses[0]} )
+    
+             //this case table bottom exist and top no
+          } else {
+    
+            dispatch( {type : "Pool_Pays",payload:data} )
+        
+          } 
       }
+     
     });
+    return () => isSubscribed = false;
   }, [tableRightTop]);
 
   console.log(tableRightTop);
@@ -82,16 +160,17 @@ const Pup = () => {
             className="form-control"
             value={link}
             type="text"
-            onChange={(e) => setLink(e.target.value)}
+            onChange={e =>dispatch({type : 'field',field :"link",value:e.target.value})}
           ></input>
         </form>
 
         <div className="input-group-append">
           <button
-            className="btn btn-outline-dark form-control"
+          style={{ width: "100px" }}
+            className="btn btn-outline-dark btn-block form-control"
             onClick={sendHorses}
           >
-            {stop ? "Stop" : "Start"}
+            {stoping ? `Stop ${compte}`  : "Start"}
           </button>
         </div>
       </div>

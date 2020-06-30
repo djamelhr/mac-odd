@@ -1,17 +1,78 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useReducer } from "react";
 import { ipcRenderer } from "electron";
 import moment from "moment";
 import Posts from "./Posts";
 import Nav from "./Nav";
 
 import Pagination from "./Pagination";
+
+
+const initalState = {
+  matchDay :'',
+  matchs:[],
+  loading: false ,
+  currentPage :1,
+  postsPerPage : 10,
+  noMatchs:false
+}
+function getMatchs(state,action){
+switch (action.type) {
+  case 'startScrapin':{
+    return{
+      ...state,
+      loading:true,
+      currentPage:1 ,
+      noMatchs:false
+
+    }
+  }
+  case 'field':{
+    return{
+      ...state,
+      [action.field]: action.value
+
+    }
+  }
+  case 'noMacthAvialable':{
+    return{
+     ...state,
+     noMatchs:true
+     
+    }
+  }
+  case 'newMatchs':{
+    console.log(action);
+
+    return{
+     ...state,
+     loading:false,
+     matchs :action.payload 
+    }
+  }
+  case 'paginate':{
+    console.log(action);
+    
+    return{
+      ...state ,
+      currentPage : action.payload
+    }
+  }
+    break;
+
+  default:
+    break;
+}
+
+}
+
+
+
+
 const App = () => {
-  const [matchDay, setMatchDay] = useState("");
-  const [matchs, setMatchs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [postsPerPage, setPostsPerPage] = useState(10);
-  const [noMatchs, setNoMatchs] = useState(false);
+
+   const [state , dispatch]= useReducer(getMatchs,initalState)
+   const   {matchDay,matchs,loading,currentPage,postsPerPage,noMatchs} = state
+  
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -20,9 +81,7 @@ const App = () => {
     if (matchDay === "") {
       alert("pls type a date");
     } else {
-      setLoading(true);
-      setCurrentPage(1);
-      setNoMatchs(false);
+      dispatch({type:'startScrapin'})
       let link = moment(matchDay).format("YYYYMMDD");
       ipcRenderer.send("pup", link);
     }
@@ -30,14 +89,16 @@ const App = () => {
   useEffect(() => {
     ipcRenderer.on("allMatchs", (e, data) => {
       if (data.length == 0) {
-        setNoMatchs(true);
+      dispatch({type:'noMacthAvialable'});  
       }
-      setMatchs(data);
-      setLoading(false);
+        
+      dispatch( {type : "newMatchs",payload:data} )
+      
     });
-  }, [matchs]);
+  }, [matchs,loading]);
   const paginate = (pageNumber) => {
-    setCurrentPage(pageNumber);
+    dispatch( {type : "paginate",payload:pageNumber} )
+
   };
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
@@ -55,7 +116,7 @@ const App = () => {
               className="form-control"
               value={matchDay}
               type="date"
-              onChange={(e) => setMatchDay(e.target.value)}
+              onChange={e =>dispatch({type : 'field',field :"matchDay",value:e.target.value})}
             ></input>
           </form>
 
