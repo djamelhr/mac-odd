@@ -14,22 +14,27 @@
   ],
   "main": "main.js",
   "scripts": {
+    "knex": "knex",
     "prod": "cross-env NODE_ENV=production webpack --mode production --config webpack.build.config.js && electron --noDevServer .",
     "start": "cross-env NODE_ENV=development webpack-dev-server --hot --host 0.0.0.0 --config=./webpack.dev.config.js --mode development",
     "build": "cross-env NODE_ENV=production webpack --config webpack.build.config.js --mode production",
     "package": "npm run build",
+    "postinstall": "electron-builder install-app-deps",
     "postpackage": "electron-packager ./ --out=./release-builds"
   },
   "dependencies": {
     "bootstrap": "^4.5.0",
+    "exceljs": "^4.1.0",
     "googleapis": "^52.1.0",
+    "knex": "^0.21.1",
     "moment": "^2.27.0",
     "puppeteer-core": "^3.3.0",
     "puppeteer-in-electron": "^3.0.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
-    "reactstrap": "^8.4.1"
+    "reactstrap": "^8.4.1",
+    "sqlite3": "^5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
@@ -40,6 +45,7 @@
     "cross-env": "^7.0.2",
     "css-loader": "^3.5.3",
     "electron": "^9.0.0",
+    "electron-builder": "^22.7.0",
     "electron-devtools-installer": "^3.0.0",
     "electron-packager": "^14.2.1",
     "file-loader": "^6.0.0",

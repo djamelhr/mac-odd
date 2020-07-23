@@ -1,7 +1,7 @@
 import React from "react";
 
 const HoresTables = ({ tableRightBottom, loading, availablePool }) => {
-  console.log(tableRightBottom);
+ // console.log(tableRightBottom);
 
   if (loading) {
     return <h2>Loading...</h2>;
