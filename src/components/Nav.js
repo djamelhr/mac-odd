@@ -9,11 +9,14 @@ const Nav = (props) => {
           <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
             <div className="navbar-nav">
               <Link className="nav-item nav-link" tag="a" to="/">
-                Soccer Odds
+                Soccer
               </Link>
 
               <Link className="nav-item nav-link" tag="a" to="/pup/">
-                Horses Odds
+                Horses
+              </Link>
+              <Link className="nav-item nav-link" tag="a" to="/massey/">
+                masseyrating
               </Link>
             </div>
           </nav>

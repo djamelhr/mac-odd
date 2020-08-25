@@ -7,7 +7,9 @@ const { app, BrowserWindow, ipcMain, ipcRenderer, shell } = require("electron");
 const pie = require("puppeteer-in-electron");
 const puppeteer = require("puppeteer-core");
 const Excel = require('exceljs');
+const googleApi = require('./googleApi');
 
+const { scrape } = require('./masseyScraper');
 
 
 var knex = require("knex")({
@@ -21,6 +23,7 @@ var knex = require("knex")({
 //const sheet = workbook.addWorksheet('My Sheet');
 let mainWindow;
 let win;
+let winKo
 let window;
 let isDev = false;
 let Lastfile
@@ -56,6 +59,8 @@ const createMainWindow = () => {
       webSecurity: false,
     },
   });
+
+
 
   let indexPath;
   let lastPath = "";
@@ -106,6 +111,35 @@ const createMainWindow = () => {
     result.then(function (rows) {
       mainWindow.webContents.send("resultSent", rows);
     })
+
+  });
+
+  ipcMain.on('masseya', async (e, arg) => {
+
+    try {
+      console.log(arg);
+      let masseybrowser = await pie.connect(app, puppeteer);
+      winKo = new BrowserWindow({ parent: mainWindow });
+
+      console.log(arg);
+      const league = "mls";
+      await winKo.loadURL(`https://www.masseyratings.com/dls/${arg}/games`);
+      const pageM = await pie.getPage(masseybrowser, winKo);
+      await scrape(pageM, arg).then(value => {
+        console.log(value[0].name);
+        const updateOpt = {
+          spreadsheetId: "1O1kcu1G16R7WWa1sp0ouNwNuw8xfno2uII9Sj4L8MZc",
+          range: "massey!A2:N",
+          valueInputOption: "USER_ENTERED",
+          resource: { values: value[0].name },
+        };
+        googleApi(updateOpt);
+      });
+      winKo.destroy();
+      mainWindow.reload();
+    } catch (error) {
+      console.log(error);
+    }
 
   });
   ipcMain.on("pup", async (e, arg) => {
@@ -196,7 +230,7 @@ const createMainWindow = () => {
               return;
             }
 
-            console.log("send IT !");
+            console.log(response);
           }
         );
       }
@@ -473,7 +507,7 @@ const createMainWindow = () => {
 
 
 
-      mainWindow.webContents.send("horses", { resultH, resultHorses });
+      // mainWindow.webContents.send("horses", { resultH, resultHorses });
       // mainWindow.webContents.send("stay", {i ,URL});
 
       window.destroy();
@@ -483,6 +517,8 @@ const createMainWindow = () => {
     }
 
   });
+
+
 };
 
 app.on("ready", createMainWindow);

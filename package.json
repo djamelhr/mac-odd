@@ -33,7 +33,10 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
+    "react-search-autocomplete": "^1.0.6",
     "reactstrap": "^8.4.1",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
     "sqlite3": "^5.0.0"
   },
   "devDependencies": {
