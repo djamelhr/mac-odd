@@ -9,6 +9,7 @@ import {
 import App from "./src/components/App";
 import Posts from "./src/components/Posts";
 import Pup from "./src/components/Pup";
+import Tvg from "./src/components/Tvg";
 import Massey from "./src/components/Massey";
 import Nav from "./src/components/Nav";
 
@@ -17,11 +18,17 @@ const Routerapp = () => (
   <HashRouter>
     <Nav />
     <div>
-
-      <Route path="/" exact component={App}></Route>
-      <Route path="/pup" exact component={Pup}></Route>
-      <Route path="/massey" exact component={Massey}></Route>
+      <Route exact={true}
+        path='/'
+        render={(props) =>
+          <App {...props} />
+        }></Route>
+      <Route path="/pup" component={Pup}></Route>
+      <Route path="/massey" component={Massey}></Route>
+      <Route path="/tvg" component={Tvg}></Route>
     </div>
+
+
   </HashRouter>
 );
 

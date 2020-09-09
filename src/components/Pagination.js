@@ -10,24 +10,24 @@ const Pagination = ({ postsPerPage, totalPosts, paginate, loading }) => {
       {loading ? (
         ""
       ) : (
-        <nav>
-          <ul className="pagination">
-            {pageNumbers.map((number) => (
-              <li key={number} className="page-item">
-                <a
-                  onClick={() => {
-                    paginate(number);
-                  }}
-                  href="#"
-                  className="page-link text-dark"
-                >
-                  <strong>{number} </strong>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
+          <nav>
+            <ul className="pagination">
+              {pageNumbers.map((number) => (
+                <li key={number} className="page-item">
+                  <a
+                    onClick={() => {
+                      paginate(number);
+                    }}
+                    href="#"
+                    className="page-link text-dark"
+                  >
+                    <strong>{number} </strong>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
     </div>
   );
 };

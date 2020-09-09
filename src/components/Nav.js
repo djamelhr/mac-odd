@@ -1,12 +1,14 @@
 import React, { useState } from "react";
+import Landing from "./Landing"
 import { Router, Link, BrowserRouter, HashRouter } from "react-router-dom";
 
 const Nav = (props) => {
   return (
-    <div>
-      <ul>
+    <div style={{ body: "#DDDDDD" }}>
+
+      <ul  >
         <HashRouter>
-          <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
+          <nav className="navbar navbar-expand-sm navbar-dark bg-secondary">
             <div className="navbar-nav">
               <Link className="nav-item nav-link" tag="a" to="/">
                 Soccer
@@ -16,12 +18,17 @@ const Nav = (props) => {
                 Horses
               </Link>
               <Link className="nav-item nav-link" tag="a" to="/massey/">
-                masseyrating
+                Massey
+              </Link>
+              <Link className="nav-item nav-link" tag="a" to="/tvg/">
+                TGV Setting
               </Link>
             </div>
           </nav>
         </HashRouter>
       </ul>
+
+
     </div>
   );
 };

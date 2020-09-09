@@ -15,33 +15,33 @@ const Posts = ({ matchs, loading, noMatchs }) => {
   return matchs.length == 0 ? (
     ""
   ) : (
-    <div>
-      <table className="table table-dark">
-        <thead>
-          <tr>
-            <th scope="col">Match</th>
-            <th scope="col">Bs</th>
-            <th scope="col">1</th>
-            <th scope="col">X</th>
-            <th scope="col">2</th>
-          </tr>
-        </thead>
-        <tbody>
-          {matchs.map((match, index) => {
-            return (
-              <tr key={index}>
-                <td>{match.match}</td>
-                <td>{match.bs}</td>
-                <td>{match.one}</td>
-                <td>{match.x}</td>
-                <td>{match.two}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
+      <div>
+        <table className="table table-dark text-center">
+          <thead>
+            <tr >
+              <th scope="col">Match</th>
+              <th scope="col">Bs</th>
+              <th scope="col">1</th>
+              <th scope="col">X</th>
+              <th scope="col">2</th>
+            </tr>
+          </thead>
+          <tbody>
+            {matchs.map((match, index) => {
+              return (
+                <tr key={index}>
+                  <td>{match.match}</td>
+                  <td>{match.bs}</td>
+                  <td>{match.one}</td>
+                  <td>{match.x}</td>
+                  <td>{match.two}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
 };
 
 export default Posts;

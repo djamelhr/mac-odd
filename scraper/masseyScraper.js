@@ -3,7 +3,7 @@ const scrape = async (page, league) => {
 
     //   await page.goto('https://www.masseyratings.com/dls/ukraine-premier/games', { waitUntil: 'networkidle2' });
     const results = []
-    console.log(league);
+
 
 
     results.push(await extractedEvaluateCall(page, league));
