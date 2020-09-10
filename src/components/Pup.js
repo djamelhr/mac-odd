@@ -172,8 +172,8 @@ const Pup = () => {
   }
 
   const sendHorses = () => {
-    console.log(link);
-    if (!validURL(link)) {
+
+    if (!validURL(link.trim())) {
       dispatch({ type: "notValid" });
       alert("Not a valid url");
 
@@ -188,7 +188,7 @@ const Pup = () => {
     }
   };
   const sendGoogle = () => {
-    if (!validURL(link)) {
+    if (!validURL(link.trim())) {
       alert("Not a valid url");
 
     }
@@ -202,6 +202,7 @@ const Pup = () => {
   };
   const stopSheet = () => {
     ipcRenderer.send("stopSheet");
+    dispatch({ type: "stopSheet" });
   }
   ipcRenderer.on('workBook', (e, data) => {
     dispatch({ type: "workbookAdd", payload: data })

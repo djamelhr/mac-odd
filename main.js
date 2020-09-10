@@ -306,23 +306,24 @@ const createMainWindow = () => {
       window = new BrowserWindow({ parent: mainWindow, show: false });
       await window.loadURL(URL);
       const page = await pie.getPage(horsesbrowser, window);
-      await page.waitFor(3000);
+      await page.waitFor(1000);
 
       let clearSheet = {
         spreadsheetId: "1O1kcu1G16R7WWa1sp0ouNwNuw8xfno2uII9Sj4L8MZc",
-        range: "horsesAPI!A2:N",
+        range: "horsesAPI!A2:Z",
       };
 
       googleApiClear(clearSheet).then(() => console.log("clear"));
       const run = async () => {
         const startTime = Date();
         let dataSheet = await tvg(page);
-        console.log(dataSheet[0].race);
+        console.log(dataSheet[0].probables);
+        let arrayTosheet = dataSheet[0].arrVal.concat([[""]], dataSheet[0].probables[0], [[""]], dataSheet[0].quickresults);
         let updateSheet = {
           spreadsheetId: "1O1kcu1G16R7WWa1sp0ouNwNuw8xfno2uII9Sj4L8MZc",
-          range: "horsesAPI!A2:N",
+          range: "horsesAPI!A2:Z",
           valueInputOption: "USER_ENTERED",
-          resource: { values: dataSheet[0].race },
+          resource: { values: arrayTosheet },
         };
 
         await googleApinsert(updateSheet);
@@ -330,7 +331,7 @@ const createMainWindow = () => {
         console.log(`START TIME - ${startTime} / END TIME - ${endTime}`)
       }
 
-      const myVar = setInterval(run, 2000);
+      const myVar = setInterval(run, 500);
       ipcMain.on("stopSheet", async () => {
         clearInterval(myVar);
         window.destroy();
