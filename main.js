@@ -119,16 +119,20 @@ const createMainWindow = () => {
     let leagues = await knex.select("*").from("leagues");
     let recentSearch = await knex('leagues').select("*").orderBy("last_scraping", 'desc').limit(10);
     let recentDate = await knex('oddsport').select("*").orderBy("created_at", 'desc').limit(10);
-    // let recentleagues = await knex.select("*").from("recent_league").orderBy('created_at', 'desc');
+    let sheets = await knex('sheets').select("*")
 
+    // let recentleagues = await knex.select("*").from("recent_league").orderBy('created_at', 'desc')
 
     let rows = {
       result,
       leagues,
       recentSearch,
-      recentDate
+      recentDate,
+      sheets
     }
-    mainWindow.webContents.send("resultSent", rows);
+    mainWindow.webContents.send("resultSentTvg", { result, sheets });
+    mainWindow.webContents.send("resultSentOdds", { recentDate, sheets });
+    mainWindow.webContents.send("resultSentLeagues", { recentSearch, leagues, sheets });
 
 
   });
@@ -137,16 +141,29 @@ const createMainWindow = () => {
     e.preventDefault();
     await knex("leagues").insert({ "name": arg });
   })
+
+  ipcMain.on("changeSheetOdds", async (e, arg) => {
+    e.preventDefault();
+    await knex("sheets").update({
+      "range": arg.range,
+      "spreadsheet_id": arg.spreadsheet_id
+    }).where("id", arg.sheetId)
+  })
+
   // Masseya
 
 
   ipcMain.on('masseya', async (e, arg) => {
 
     try {
+
+
       const league = arg
       await knex("leagues").update({
         "last_scraping": knex.fn.now(),
-      }).where("name", league)
+      }).where("name", league);
+      const masseySheet = await knex("sheets").select("*").where("id", 2);
+      console.log(masseySheet);
       // const recentSearch = await knex('leagues').select("*").orderBy("last_scraping", 'desc');
       let masseybrowser = await pie.connect(app, puppeteer);
       winKo = new BrowserWindow({ parent: mainWindow, show: false, });
@@ -154,9 +171,10 @@ const createMainWindow = () => {
       const pageM = await pie.getPage(masseybrowser, winKo);
       const value = await scrape(pageM, arg)
       console.log(value[0].name);
+
       const updateOptMassey = {
-        spreadsheetId: "1O1kcu1G16R7WWa1sp0ouNwNuw8xfno2uII9Sj4L8MZc",
-        range: "massey!A2:N",
+        spreadsheetId: masseySheet[0].spreadsheet_id,
+        range: masseySheet[0].range,
         valueInputOption: "USER_ENTERED",
         resource: { values: value[0].name },
       };
@@ -173,13 +191,12 @@ const createMainWindow = () => {
 
   });
   ipcMain.on("pup", async (e, arg) => {
-    console.log(arg);
-
     try {
       await knex('oddsport').insert({
         date: arg.matchDay,
         created_at: knex.fn.now()
       })
+      const oddsSheet = await knex("sheets").select("*").where("id", 3);
       let browser = await pie.connect(app, puppeteer);
       const url = `https://www.oddsportal.com/matches/soccer/${arg.link}`;
       await win.loadURL(url);
@@ -187,8 +204,8 @@ const createMainWindow = () => {
 
       await oddsportal(page).then(odds => {
         const updateOpt = {
-          spreadsheetId: "1O1kcu1G16R7WWa1sp0ouNwNuw8xfno2uII9Sj4L8MZc",
-          range: "odds!A2:O",
+          spreadsheetId: oddsSheet[0].spreadsheet_id,
+          range: oddsSheet[0].range,
           valueInputOption: "USER_ENTERED",
           resource: { values: odds[0].sheetArray },
         };
@@ -299,7 +316,8 @@ const createMainWindow = () => {
 
 
     try {
-
+      const horsesSheet = await knex("sheets").select("*").where("id", 1);
+      console.log(horsesSheet);
       let horsesbrowser = await pie.connect(app, puppeteer);
       const URL = arg.link;
 
@@ -309,8 +327,8 @@ const createMainWindow = () => {
       await page.waitFor(1000);
 
       let clearSheet = {
-        spreadsheetId: "1O1kcu1G16R7WWa1sp0ouNwNuw8xfno2uII9Sj4L8MZc",
-        range: "horsesAPI!A2:Z",
+        spreadsheetId: horsesSheet[0].spreadsheet_id,
+        range: horsesSheet[0].range,
       };
 
       googleApiClear(clearSheet).then(() => console.log("clear"));
@@ -320,8 +338,8 @@ const createMainWindow = () => {
         console.log(dataSheet[0].probables);
         let arrayTosheet = dataSheet[0].arrVal.concat([[""]], dataSheet[0].probables[0], [[""]], dataSheet[0].quickresults);
         let updateSheet = {
-          spreadsheetId: "1O1kcu1G16R7WWa1sp0ouNwNuw8xfno2uII9Sj4L8MZc",
-          range: "horsesAPI!A2:Z",
+          spreadsheetId: horsesSheet[0].spreadsheet_id,
+          range: horsesSheet[0].range,
           valueInputOption: "USER_ENTERED",
           resource: { values: arrayTosheet },
         };
@@ -340,7 +358,7 @@ const createMainWindow = () => {
           created_at: knex.fn.now(),
           name: "GSheet",
           url: arg.link
-        });
+        }).orderBy('created_at', 'desc');
       })
 
     } catch (error) {

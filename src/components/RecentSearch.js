@@ -6,7 +6,7 @@ import { ipcRenderer } from "electron";
 const RecentSearch = ({ recentSearch }) => {
     console.log(recentSearch);
     const mystyle = {
-        fontSize: "13px",
+        fontSize: "14px",
 
     };
     return (

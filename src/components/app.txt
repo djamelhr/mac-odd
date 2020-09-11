@@ -10,6 +10,7 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Input, Label, Form,
 
 
 const initalState = {
+
   matchDay: '',
   matchs: [],
   recentDate: [],
@@ -40,15 +41,15 @@ function getMatchs(state, action) {
 
       }
     }
-    // case 'resSheets': {
-    //   return {
-    //     ...state,
-    //     sheetId: action.payload.id,
-    //     range: action.payload.range,
-    //     spreadsheet_id: action.payload.spreadsheet_id
+    case 'resSheets': {
+      return {
+        ...state,
+        sheetId: action.payload.id,
+        range: action.payload.range,
+        spreadsheet_id: action.payload.spreadsheet_id
 
-    //   }
-    // }
+      }
+    }
 
     case 'noMacthAvialable': {
       return {
@@ -74,19 +75,21 @@ function getMatchs(state, action) {
       }
     }
     case 'paginate': {
+      console.log(action.payload);
       return {
         ...state,
         currentPage: action.payload
       }
     }
     case 'modal': {
+
       return {
         ...state,
         modal: action.payload
       }
     }
 
-
+      break;
 
     default:
       break;
@@ -118,11 +121,10 @@ const App = () => {
     }
   };
   const changeOdds = () => {
+    console.log('odds sheet');
     toggle()
     ipcRenderer.send("changeSheetOdds", { sheetId, range, spreadsheet_id });
   }
-
-
 
   useEffect(() => {
     ipcRenderer.send("mainWindowLoaded");
@@ -130,14 +132,16 @@ const App = () => {
       if (data.length == 0) {
         dispatch({ type: 'noMacthAvialable' });
       }
-      dispatch({ type: "newMatchs", payload: data });
+
+      dispatch({ type: "newMatchs", payload: data })
+
     });
-    ipcRenderer.on("resultSentOdds", (e, data) => {
-      console.log(data);
-      dispatch({ type: "resDate", payload: data });
-      // dispatch({ type: "resSheets", payload: data });
-    });
-  }, []);
+    // ipcRenderer.on("resultSentOdds", (e, data) => {
+    //   dispatch({ type: "resDate", payload: data });
+    //   // dispatch({ type: "resSheets", payload: data });
+    // });
+  });
+
   const paginate = (pageNumber) => {
     dispatch({ type: "paginate", payload: pageNumber })
   };
@@ -166,12 +170,12 @@ const App = () => {
           </form>
 
           <div className="input-group-append">
-            <button className="btn  btn-dark " onClick={sendPup}>
+            <button className="btn btn-outline-dark" onClick={sendPup}>
               {" "}
               Start
             </button>
-            <div>
-              <Button color="success" onClick={toggle}>Range</Button>
+            {/* <div>
+              <Button color="danger" onClick={toggle}>Edit</Button>
               <Modal isOpen={modal} toggle={toggle} >
                 <ModalHeader toggle={toggle}>Modal title</ModalHeader>
                 <ModalBody>
@@ -198,7 +202,7 @@ const App = () => {
                   <Button color="secondary" onClick={toggle}>Cancel</Button>
                 </ModalFooter>
               </Modal>
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="row">
@@ -214,9 +218,9 @@ const App = () => {
               ></Pagination>
             </div>
           </div>
-          <div className="col-2">
+          {/* <div className="col-2">
             <RecentDate recentDate={recentDate} />
-          </div>
+          </div> */}
 
         </div>
 

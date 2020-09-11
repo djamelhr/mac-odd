@@ -20,9 +20,7 @@ const Nav = (props) => {
               <Link className="nav-item nav-link" tag="a" to="/massey/">
                 Massey
               </Link>
-              <Link className="nav-item nav-link" tag="a" to="/tvg/">
-                TGV Setting
-              </Link>
+
             </div>
           </nav>
         </HashRouter>

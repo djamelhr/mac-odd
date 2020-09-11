@@ -1,50 +1,17 @@
 
 import React, { useState, useEffect, useContext, useReducer } from "react";
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Input, Label, Form, FormGroup } from 'reactstrap';
+
 import { ipcRenderer } from "electron";
-import { ReactSearchAutocomplete } from "react-search-autocomplete";
+
 
 
 const initalState = {
-    matchDay: '',
-    matchs: [],
-    items: [
-        {
-            id: 0,
-            name: "ukraine-premier",
-        },
-        {
-            id: 1,
-            name: "germany-bundesliga-1"
-        },
-        {
-            id: 2,
-            name: "espain-la-liga"
-        },
-        {
-            id: 3,
-            name: "italy-serie-a"
-        },
-        {
-            id: 4,
-            name: "mls"
-        },
-    ],
-    loading: false,
-    currentPage: 1,
-    postsPerPage: 10,
-    noMatchs: false
+    sheets: [],
 }
 function getMatchs(state, action) {
     switch (action.type) {
-        case 'startScrapin': {
-            return {
-                ...state,
-                loading: true,
-                currentPage: 1,
-                noMatchs: false
 
-            }
-        }
         case 'field': {
             return {
                 ...state,
@@ -52,44 +19,53 @@ function getMatchs(state, action) {
 
             }
         }
-        case 'noMacthAvialable': {
+        case 'resSheets': {
             return {
                 ...state,
-                noMatchs: true
+                sheets: action.payload
 
             }
         }
-        case 'newMatchs': {
-            console.log(action);
 
-            return {
-                ...state,
-                loading: false,
-                matchs: action.payload
-            }
-        }
-        case 'paginate': {
-            console.log(action);
 
-            return {
-                ...state,
-                currentPage: action.payload
-            }
-        }
-            break;
 
         default:
             break;
     }
 
 }
-const Tvg = () => {
+const Tvg = (props) => {
+    const [state, dispatch] = useReducer(getMatchs, initalState)
+    const { sheets } = state
+
+    const {
+        buttonLabel,
+        className
+    } = props;
+
+    const [modal, setModal] = useState(false);
+
+    const toggle = () => setModal(!modal);
+    ipcRenderer.on("resultSent", (e, data) => {
+        console.log(data);
+        dispatch({ type: "resSheets", payload: data.sheets })
+
+    });
+    useEffect(() => {
+        ipcRenderer.send("mainWindowLoaded");
+
+    }, []);
+    console.log(sheets);
 
     return (
         <div>djo</div>
-    )
+    );
+
 
 
 }
+
+
+
 
 export default Tvg;

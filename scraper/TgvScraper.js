@@ -174,7 +174,10 @@ async function extractedEvaluateCall(pageH) {
             probables,
             quickresults,
             keyn,
-            arrVal
+            arrVal,
+            race,
+            racePays,
+            racePools
 
         }
     } catch (error) {

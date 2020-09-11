@@ -4,6 +4,8 @@ import AutoComplete from './AutoComplete';
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import TableMassey from "./TableMassey";
 import RecentSearch from "./RecentSearch"
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Input, Label, Form, FormGroup } from 'reactstrap';
+
 
 
 const initalState = {
@@ -20,7 +22,11 @@ const initalState = {
     loading: false,
     currentPage: 1,
     postsPerPage: 10,
-    noMatchs: false
+    noMatchs: false,
+    range: '',
+    spreadsheet_id: "",
+    sheetId: 0,
+    modal: false,
 }
 function getMatchs(state, action) {
     switch (action.type) {
@@ -67,8 +73,11 @@ function getMatchs(state, action) {
         case 'leagues': {
             return {
                 ...state,
-                items: action.payload
-
+                items: action.payload.leagues,
+                recentSearch: action.payload.recentSearch,
+                sheetId: action.payload.sheets[1].id,
+                range: action.payload.sheets[1].range,
+                spreadsheet_id: action.payload.sheets[1].spreadsheet_id
             }
         }
         case 'newMatchs': {
@@ -87,6 +96,12 @@ function getMatchs(state, action) {
                 recentSearch: action.payload
             }
         }
+        case 'modal': {
+            return {
+                ...state,
+                modal: action.payload
+            }
+        }
         case 'paginate': {
             console.log(action);
 
@@ -95,7 +110,7 @@ function getMatchs(state, action) {
                 currentPage: action.payload
             }
         }
-            break;
+
 
         default:
             break;
@@ -107,7 +122,7 @@ const Massey = () => {
 
 
     const [state, dispatch] = useReducer(getMatchs, initalState)
-    let { items, matchDay, games, loading, currentPage, postsPerPage, noMatchs, searchCheck, recentSearch } = state
+    let { modal, sheetId, range, spreadsheet_id, items, matchDay, games, loading, currentPage, postsPerPage, noMatchs, searchCheck, recentSearch } = state
     const onSubmit = (e) => {
         console.log(e);
         e.preventDefault();
@@ -132,11 +147,15 @@ const Massey = () => {
         console.log("itemselect", item.name);
         matchDay = item.name;
     }
+    const toggle = () => dispatch({ type: 'modal', payload: !modal });
 
     const handleOnFocus = () => {
         console.log("Focused");
     }
-
+    const changeOdds = () => {
+        toggle()
+        ipcRenderer.send("changeSheetOdds", { sheetId, range, spreadsheet_id });
+    }
     useEffect(() => {
         ipcRenderer.send("mainWindowLoaded");
 
@@ -150,13 +169,10 @@ const Massey = () => {
             dispatch({ type: 'search', payload: { "string": "", "cached": true } })
 
         });
-        ipcRenderer.on("resultSent", (e, data) => {
-            dispatch({ type: "res", payload: data.recentSearch })
 
-        });
     }, []);
-    ipcRenderer.on("resultSent", (e, data) => {
-        dispatch({ type: "leagues", payload: data.leagues })
+    ipcRenderer.on("resultSentLeagues", (e, data) => {
+        dispatch({ type: "leagues", payload: data })
 
     });
 
@@ -231,6 +247,35 @@ const Massey = () => {
                                 {" "}
               Start
             </button>
+                        </div>
+                        <div>
+                            <Button color="success" onClick={toggle}>Range</Button>
+                            <Modal isOpen={modal} toggle={toggle} >
+                                <ModalHeader toggle={toggle}>Modal title</ModalHeader>
+                                <ModalBody>
+                                    <Form >
+                                        <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
+                                            <Label for="exampleRange" className="mr-sm-2">Range</Label>
+                                            <Input type="text" name="range" value={range} id="exampleRange" placeholder=""
+                                                onChange={e => dispatch({ type: 'field', field: "range", value: e.target.value })}
+
+                                            />
+                                        </FormGroup>
+                                        <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
+                                            <Label for="exampleSsheetId" className="mr-sm-2">spreadsheet_id</Label>
+                                            <Input type="text" name="spreadsheet_id" value={spreadsheet_id} id="exampleSsheetId" placeholder=""
+                                                onChange={e => dispatch({ type: 'field', field: "spreadsheet_id", value: e.target.value })}
+
+                                            />
+                                        </FormGroup>
+
+                                    </Form>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="primary" onClick={changeOdds}>Save</Button>{' '}
+                                    <Button color="secondary" onClick={toggle}>Cancel</Button>
+                                </ModalFooter>
+                            </Modal>
                         </div>
 
                     </div>

@@ -4,8 +4,7 @@ import '../App.css';
 import { ipcRenderer } from "electron";
 import TableLinks from "./TableLinks"
 import Paginationdb from "./Paginationdb";
-import { Spinner, Button } from 'reactstrap';
-import Landing from "./Landing";
+import { Spinner, Button, Modal, ModalHeader, ModalBody, ModalFooter, Input, Label, Form, FormGroup } from 'reactstrap';
 
 const initalState = {
   compte: 0,
@@ -22,6 +21,10 @@ const initalState = {
   tableRightBottom: [],
   tableCenterBottom: [],
   tableCenterTop: [],
+  range: '',
+  spreadsheet_id: "",
+  sheetId: 0,
+  modal: false,
 }
 function getHorses(state, action) {
   switch (action.type) {
@@ -82,7 +85,10 @@ function getHorses(state, action) {
     case 'workbookAdd': {
       return {
         ...state,
-        workbook: action.payload
+        workbook: action.payload.result,
+        sheetId: action.payload.sheets[0].id,
+        range: action.payload.sheets[0].range,
+        spreadsheet_id: action.payload.sheets[0].spreadsheet_id
       }
     }
     case 'noPays_NoPool': {
@@ -115,6 +121,12 @@ function getHorses(state, action) {
         tableRightBottom: action.payload
       }
     }
+    case 'modal': {
+      return {
+        ...state,
+        modal: action.payload
+      }
+    }
     case 'Pool_Pays': {
 
 
@@ -139,13 +151,13 @@ const Pup = () => {
 
   const [state, dispatch] = useReducer(getHorses, initalState)
   const {
-    workbook, compte, link, loading, stoping, currentPage, loadingExcel,
+    modal, sheetId, range, spreadsheet_id, workbook, compte, link, loading, stoping, currentPage, loadingExcel,
     postsPerPage, availablePays, availablePool, tableRightTop, tableRightBottom, tableCenterBottom, tableCenterTop, } = state
 
   const onSubmit = (e) => {
     e.preventDefault();
   };
-
+  const toggle = () => dispatch({ type: 'modal', payload: !modal });
   function handleClick(e) {
     e.preventDefault();
     ipcRenderer.send('openFile', e.target.href);
@@ -170,7 +182,10 @@ const Pup = () => {
 
 
   }
-
+  const changeOdds = () => {
+    toggle()
+    ipcRenderer.send("changeSheetOdds", { sheetId, range, spreadsheet_id });
+  }
   const sendHorses = () => {
 
     if (!validURL(link.trim())) {
@@ -204,17 +219,17 @@ const Pup = () => {
     ipcRenderer.send("stopSheet");
     dispatch({ type: "stopSheet" });
   }
-  ipcRenderer.on('workBook', (e, data) => {
-    dispatch({ type: "workbookAdd", payload: data })
-  });
 
-  ipcRenderer.on("resultSent", (e, data) => {
-    dispatch({ type: "workbookAdd", payload: data.result })
-
-  });
   useEffect(() => {
     ipcRenderer.send("mainWindowLoaded");
+    ipcRenderer.on('workBook', (e, data) => {
+      dispatch({ type: "workbookAdd", payload: data })
+    });
 
+    ipcRenderer.on("resultSentTvg", (e, data) => {
+      dispatch({ type: "workbookAdd", payload: data })
+
+    });
   }, []);
 
   const mystyle = {
@@ -285,6 +300,35 @@ const Pup = () => {
           >
             {loadingExcel && <Spinner color="success" size="sm" />}     Genrate Excel
           </button>
+        </div>
+        <div>
+          <Button color="success" onClick={toggle}>Range</Button>
+          <Modal isOpen={modal} toggle={toggle} >
+            <ModalHeader toggle={toggle}>Modal title</ModalHeader>
+            <ModalBody>
+              <Form >
+                <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
+                  <Label for="exampleRange" className="mr-sm-2">Range</Label>
+                  <Input type="text" name="range" value={range} id="exampleRange" placeholder=""
+                    onChange={e => dispatch({ type: 'field', field: "range", value: e.target.value })}
+
+                  />
+                </FormGroup>
+                <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
+                  <Label for="exampleSsheetId" className="mr-sm-2">spreadsheet_id</Label>
+                  <Input type="text" name="spreadsheet_id" value={spreadsheet_id} id="exampleSsheetId" placeholder=""
+                    onChange={e => dispatch({ type: 'field', field: "spreadsheet_id", value: e.target.value })}
+
+                  />
+                </FormGroup>
+
+              </Form>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="primary" onClick={changeOdds}>Save</Button>{' '}
+              <Button color="secondary" onClick={toggle}>Cancel</Button>
+            </ModalFooter>
+          </Modal>
         </div>
       </div>
 

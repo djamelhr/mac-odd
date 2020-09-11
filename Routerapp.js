@@ -25,10 +25,8 @@ const Routerapp = () => (
         }></Route>
       <Route path="/pup" component={Pup}></Route>
       <Route path="/massey" component={Massey}></Route>
-      <Route path="/tvg" component={Tvg}></Route>
+
     </div>
-
-
   </HashRouter>
 );
 
